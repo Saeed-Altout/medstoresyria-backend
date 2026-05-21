@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { databaseConfig } from './config/database.config';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { BrandsModule } from './modules/brands/brands.module';
 import { CategoriesModule } from './modules/categories/categories.module';
@@ -22,6 +25,7 @@ import { SettingsModule } from './modules/settings/settings.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => databaseConfig(config),
     }),
+    AuthModule,
     UsersModule,
     BrandsModule,
     CategoriesModule,
@@ -34,6 +38,12 @@ import { SettingsModule } from './modules/settings/settings.module';
     MaintenanceModule,
     NotificationsModule,
     SettingsModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
   ],
 })
 export class AppModule {}
