@@ -8,35 +8,26 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AppException } from '../exceptions/app.exception';
-import { translate, getLocaleFromHeader, MessageKey } from '../i18n/messages';
-
-interface ErrorResponse {
-  success: false;
-  statusCode: number;
-  message: string;
-  errors: string[] | null;
-  data: null;
-  meta: null;
-}
+import { translate, MessageKey } from '../i18n/messages';
 
 @Catch()
-export class GlobalExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(GlobalExceptionFilter.name);
+export class HttpExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(HttpExceptionFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
 
-    const locale = getLocaleFromHeader(request.headers['accept-language']);
+    const locale: string = request.locale ?? 'en';
 
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = translate('INTERNAL_ERROR', locale);
-    let errors: string[] | null = null;
+    let errors: Array<{ field?: string; en: string; ar: string }> | null = null;
 
     if (exception instanceof AppException) {
       statusCode = exception.getStatus();
-      message = translate(exception.messageKey, locale);
+      message = translate(exception.messageKey, locale, exception.params);
     } else if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
       const body = exception.getResponse();
@@ -45,7 +36,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         const rawMessage = (body as { message: unknown }).message;
         if (Array.isArray(rawMessage)) {
           message = translate('VALIDATION_FAILED', locale);
-          errors = rawMessage as string[];
+          errors = rawMessage.map((msg: unknown) => {
+            if (typeof msg === 'string') {
+              try {
+                const parsed = JSON.parse(msg) as { field?: string; en: string; ar: string };
+                return parsed;
+              } catch {
+                return { en: msg, ar: msg };
+              }
+            }
+            return { en: String(msg), ar: String(msg) };
+          });
         } else if (typeof rawMessage === 'string') {
           message = rawMessage;
         }
@@ -56,15 +57,16 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       this.logger.error(exception);
     }
 
-    const body: ErrorResponse = {
+    response.status(statusCode).json({
       success: false,
       statusCode,
       message,
       errors,
       data: null,
       meta: null,
-    };
-
-    response.status(statusCode).json(body);
+    });
   }
 }
+
+// Re-export under old name for backwards compat within this session
+export { HttpExceptionFilter as GlobalExceptionFilter };
