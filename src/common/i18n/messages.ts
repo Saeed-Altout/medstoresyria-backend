@@ -21,7 +21,14 @@ export const Messages = {
   // Products
   PRODUCT_NOT_FOUND: { en: 'Product not found', ar: 'المنتج غير موجود' },
   PRODUCT_SLUG_TAKEN: { en: 'Product slug is already in use', ar: 'معرف المنتج مستخدم بالفعل' },
+  PRODUCT_SLUG_EXISTS: { en: 'Product slug is already in use', ar: 'معرف المنتج مستخدم بالفعل' },
   PRODUCT_OUT_OF_STOCK: { en: 'Product is out of stock', ar: 'المنتج غير متوفر في المخزن' },
+  PRODUCT_CREATED: { en: 'Product created successfully', ar: 'تم إنشاء المنتج بنجاح' },
+  PRODUCT_IMAGE_UPLOADED: { en: 'Image uploaded successfully', ar: 'تم رفع الصورة بنجاح' },
+  PRODUCT_IMAGE_DELETED: { en: 'Image deleted successfully', ar: 'تم حذف الصورة بنجاح' },
+  // Inventory
+  INSUFFICIENT_STOCK: { en: 'Insufficient stock for product "{product}"', ar: 'المخزون غير كافٍ للمنتج "{product}"' },
+  STOCK_ADJUSTED: { en: 'Stock adjusted successfully', ar: 'تم تعديل المخزون بنجاح' },
   // Categories
   CATEGORY_NOT_FOUND: { en: 'Category not found', ar: 'التصنيف غير موجود' },
   CATEGORY_SLUG_TAKEN: { en: 'Category slug is already in use', ar: 'معرف التصنيف مستخدم بالفعل' },

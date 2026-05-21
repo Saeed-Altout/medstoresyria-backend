@@ -118,7 +118,7 @@ export class AttributesService {
           label: t.name,
           attributeDefinition: { id: attrId },
         })
-        .orUpdate(['label'], ['attributeDefinition', 'locale'])
+        .orUpdate(['label'], ['attributeDefinitionId', 'locale'])
         .execute();
     }
   }

@@ -140,7 +140,7 @@ export class CategoriesService {
           description: t.description ?? null,
           category: { id: categoryId },
         })
-        .orUpdate(['name', 'description'], ['category', 'locale'])
+        .orUpdate(['name', 'description'], ['categoryId', 'locale'])
         .execute();
     }
   }

@@ -118,7 +118,7 @@ export class BrandsService {
           description: t.description ?? null,
           brand: { id: brandId },
         })
-        .orUpdate(['name', 'description'], ['brand', 'locale'])
+        .orUpdate(['name', 'description'], ['brandId', 'locale'])
         .execute();
     }
   }
