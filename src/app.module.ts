@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { databaseConfig } from './config/database.config';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { AuthModule } from './modules/auth/auth.module';
+import { StorageModule } from './modules/storage/storage.module';
 import { UsersModule } from './modules/users/users.module';
 import { BrandsModule } from './modules/brands/brands.module';
 import { CategoriesModule } from './modules/categories/categories.module';
@@ -26,6 +27,7 @@ import { SettingsModule } from './modules/settings/settings.module';
       useFactory: (config: ConfigService) => databaseConfig(config),
     }),
     AuthModule,
+    StorageModule,
     UsersModule,
     BrandsModule,
     CategoriesModule,
