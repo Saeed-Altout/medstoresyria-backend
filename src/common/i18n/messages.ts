@@ -25,9 +25,21 @@ export const Messages = {
   // Categories
   CATEGORY_NOT_FOUND: { en: 'Category not found', ar: 'التصنيف غير موجود' },
   CATEGORY_SLUG_TAKEN: { en: 'Category slug is already in use', ar: 'معرف التصنيف مستخدم بالفعل' },
+  CATEGORY_SLUG_EXISTS: { en: 'Category slug is already in use', ar: 'معرف التصنيف مستخدم بالفعل' },
+  CATEGORY_PARENT_NOT_FOUND: { en: 'Parent category not found', ar: 'التصنيف الأب غير موجود' },
+  CATEGORY_CREATED: { en: 'Category created successfully', ar: 'تم إنشاء التصنيف بنجاح' },
   // Brands
   BRAND_NOT_FOUND: { en: 'Brand not found', ar: 'الماركة غير موجودة' },
   BRAND_SLUG_TAKEN: { en: 'Brand slug is already in use', ar: 'معرف الماركة مستخدم بالفعل' },
+  BRAND_SLUG_EXISTS: { en: 'Brand slug is already in use', ar: 'معرف الماركة مستخدم بالفعل' },
+  BRAND_CREATED: { en: 'Brand created successfully', ar: 'تم إنشاء الماركة بنجاح' },
+  // Attributes
+  ATTRIBUTE_NOT_FOUND: { en: 'Attribute not found', ar: 'السمة غير موجودة' },
+  ATTRIBUTE_KEY_EXISTS: { en: 'Attribute key already exists in this category', ar: 'مفتاح السمة موجود بالفعل في هذا التصنيف' },
+  ATTRIBUTE_CREATED: { en: 'Attribute created successfully', ar: 'تم إنشاء السمة بنجاح' },
+  // Storage
+  INVALID_FILE_TYPE: { en: 'Invalid file type. Allowed: JPEG, PNG, WEBP', ar: 'نوع الملف غير مدعوم. المسموح: JPEG، PNG، WEBP' },
+  FILE_TOO_LARGE: { en: 'File size exceeds the 5MB limit', ar: 'حجم الملف يتجاوز الحد المسموح (5 ميغابايت)' },
   // Orders
   ORDER_NOT_FOUND: { en: 'Order not found', ar: 'الطلب غير موجود' },
   ORDER_CANNOT_CANCEL: { en: 'Order cannot be cancelled at this stage', ar: 'لا يمكن إلغاء الطلب في هذه المرحلة' },
