@@ -49,7 +49,10 @@ export const Messages = {
   FILE_TOO_LARGE: { en: 'File size exceeds the 5MB limit', ar: 'حجم الملف يتجاوز الحد المسموح (5 ميغابايت)' },
   // Orders
   ORDER_NOT_FOUND: { en: 'Order not found', ar: 'الطلب غير موجود' },
+  ORDER_TRACK_NOT_FOUND: { en: 'Order not found for the provided details', ar: 'لم يُعثر على الطلب بالبيانات المقدمة' },
   ORDER_CANNOT_CANCEL: { en: 'Order cannot be cancelled at this stage', ar: 'لا يمكن إلغاء الطلب في هذه المرحلة' },
+  ORDER_INVALID_TRANSITION: { en: 'Invalid order status transition', ar: 'تغيير حالة الطلب غير مسموح' },
+  ORDER_CREATED: { en: 'Order placed successfully', ar: 'تم تقديم الطلب بنجاح' },
   // Maintenance
   MAINTENANCE_NOT_FOUND: { en: 'Maintenance request not found', ar: 'طلب الصيانة غير موجود' },
   // Governorates
