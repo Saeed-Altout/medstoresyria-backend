@@ -55,6 +55,15 @@ export const Messages = {
   ORDER_CREATED: { en: 'Order placed successfully', ar: 'تم تقديم الطلب بنجاح' },
   // Maintenance
   MAINTENANCE_NOT_FOUND: { en: 'Maintenance request not found', ar: 'طلب الصيانة غير موجود' },
+  MAINTENANCE_TRACK_NOT_FOUND: { en: 'Maintenance request not found for the provided details', ar: 'لم يُعثر على طلب الصيانة بالبيانات المقدمة' },
+  MAINTENANCE_CREATED: { en: 'Maintenance request submitted successfully', ar: 'تم تقديم طلب الصيانة بنجاح' },
+  MAINTENANCE_ASSIGNED: { en: 'Technician assigned successfully', ar: 'تم تعيين الفني بنجاح' },
+  MAINTENANCE_INVALID_TRANSITION: { en: 'Invalid maintenance status transition', ar: 'تغيير حالة طلب الصيانة غير مسموح' },
+  TECHNICIAN_NOT_FOUND: { en: 'Technician not found', ar: 'الفني غير موجود' },
+  // Invoices
+  INVOICE_NOT_FOUND: { en: 'Invoice not found', ar: 'الفاتورة غير موجودة' },
+  INVOICE_ALREADY_EXISTS: { en: 'Invoice already exists for this order', ar: 'الفاتورة موجودة بالفعل لهذا الطلب' },
+  INVOICE_GENERATED: { en: 'Invoice generated successfully', ar: 'تم إنشاء الفاتورة بنجاح' },
   // Governorates
   GOVERNORATE_NOT_FOUND: { en: 'Governorate not found', ar: 'المحافظة غير موجودة' },
   GOVERNORATE_INACTIVE: { en: 'Delivery is not available to this governorate', ar: 'التوصيل غير متاح لهذه المحافظة' },
