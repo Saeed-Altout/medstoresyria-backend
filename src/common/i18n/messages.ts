@@ -70,6 +70,16 @@ export const Messages = {
   // Translations
   TRANSLATION_MISSING_EN: { en: 'English translation is required', ar: 'الترجمة الإنجليزية مطلوبة' },
   TRANSLATION_LOCALE_EXISTS: { en: 'A translation for this locale already exists', ar: 'توجد ترجمة لهذه اللغة بالفعل' },
+  // Settings
+  SETTING_NOT_FOUND: { en: 'Setting not found', ar: 'الإعداد غير موجود' },
+  SETTINGS_UPDATED: { en: 'Settings updated successfully', ar: 'تم تحديث الإعدادات بنجاح' },
+  // Users (staff management)
+  USER_CREATED: { en: 'User created successfully', ar: 'تم إنشاء المستخدم بنجاح' },
+  USER_UPDATED: { en: 'User updated successfully', ar: 'تم تحديث المستخدم بنجاح' },
+  USER_ACTIVATED: { en: 'User activated successfully', ar: 'تم تفعيل المستخدم بنجاح' },
+  USER_DEACTIVATED: { en: 'User deactivated successfully', ar: 'تم تعطيل المستخدم بنجاح' },
+  // Reports
+  REPORTS_FETCHED: { en: 'Report generated successfully', ar: 'تم إنشاء التقرير بنجاح' },
 } as const;
 
 export type MessageKey = keyof typeof Messages;
