@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { Public } from '../../common/decorators/public.decorator';
@@ -13,7 +23,7 @@ import { AssignMaintenanceDto } from './dto/assign-maintenance.dto';
 import { UpdateMaintenanceStatusDto } from './dto/update-maintenance-status.dto';
 
 @ApiTags('Maintenance')
-@Controller('api/v1/maintenance')
+@Controller('maintenance')
 export class MaintenanceController {
   constructor(private readonly maintenanceService: MaintenanceService) {}
 
@@ -27,7 +37,11 @@ export class MaintenanceController {
   ): Promise<HandlerResult<{ requestId: string; requestNumber: string }>> {
     const userId = (req.user as { id?: string } | undefined)?.id;
     const result = await this.maintenanceService.create(dto, userId);
-    return { messageKey: result.messageKey, data: result.data, statusCode: 201 };
+    return {
+      messageKey: result.messageKey,
+      data: result.data,
+      statusCode: 201,
+    };
   }
 
   @Roles(Role.ADMIN, Role.SALES)
@@ -43,7 +57,9 @@ export class MaintenanceController {
   @Get('my')
   @ApiOperation({ summary: 'Get my maintenance requests' })
   @ApiResponse({ status: 200, description: 'Requests fetched' })
-  async findMyRequests(@CurrentUser('id') userId: string): Promise<HandlerResult<MaintenanceRequest[]>> {
+  async findMyRequests(
+    @CurrentUser('id') userId: string,
+  ): Promise<HandlerResult<MaintenanceRequest[]>> {
     const data = await this.maintenanceService.findMyRequests(userId);
     return { data };
   }
@@ -52,7 +68,9 @@ export class MaintenanceController {
   @Get('assigned')
   @ApiOperation({ summary: 'Get requests assigned to me (technician)' })
   @ApiResponse({ status: 200, description: 'Requests fetched' })
-  async findAssigned(@CurrentUser('id') userId: string): Promise<HandlerResult<MaintenanceRequest[]>> {
+  async findAssigned(
+    @CurrentUser('id') userId: string,
+  ): Promise<HandlerResult<MaintenanceRequest[]>> {
     const data = await this.maintenanceService.findAssigned(userId);
     return { data };
   }
@@ -67,7 +85,10 @@ export class MaintenanceController {
     @Param('requestNumber') requestNumber: string,
     @Query('email') email: string,
   ): Promise<HandlerResult<MaintenanceRequest>> {
-    const data = await this.maintenanceService.trackRequest(requestNumber, email);
+    const data = await this.maintenanceService.trackRequest(
+      requestNumber,
+      email,
+    );
     return { data };
   }
 
@@ -76,7 +97,9 @@ export class MaintenanceController {
   @ApiOperation({ summary: 'Get maintenance request by ID' })
   @ApiResponse({ status: 200, description: 'Request fetched' })
   @ApiResponse({ status: 404, description: 'Not found' })
-  async findById(@Param('id', ParseUUIDPipe) id: string): Promise<HandlerResult<MaintenanceRequest>> {
+  async findById(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<HandlerResult<MaintenanceRequest>> {
     const data = await this.maintenanceService.findById(id);
     return { data };
   }

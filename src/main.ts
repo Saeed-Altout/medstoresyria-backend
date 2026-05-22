@@ -22,8 +22,15 @@ async function bootstrap(): Promise<void> {
   const isDev = config.get<string>('NODE_ENV') !== 'production';
 
   app.enableCors({
-    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-      if (!origin || allowedOrigins.includes(origin) || (isDev && /^https?:\/\/localhost(:\d+)?$/.test(origin))) {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        (isDev && /^https?:\/\/localhost(:\d+)?$/.test(origin))
+      ) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));

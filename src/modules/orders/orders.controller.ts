@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { Public } from '../../common/decorators/public.decorator';
@@ -15,7 +25,7 @@ import { OrderFiltersDto } from './dto/order-filters.dto';
 import { ChangeStatusDto } from './dto/change-status.dto';
 
 @ApiTags('Orders')
-@Controller('api/v1/orders')
+@Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
@@ -26,17 +36,25 @@ export class OrdersController {
   async create(
     @Body() dto: CreateOrderDto,
     @Req() req: Request,
-  ): Promise<HandlerResult<{ orderId: string; orderNumber: string; total: string }>> {
+  ): Promise<
+    HandlerResult<{ orderId: string; orderNumber: string; total: string }>
+  > {
     const userId = (req.user as { id?: string } | undefined)?.id;
     const result = await this.ordersService.create(dto, userId);
-    return { messageKey: result.messageKey, data: result.data, statusCode: 201 };
+    return {
+      messageKey: result.messageKey,
+      data: result.data,
+      statusCode: 201,
+    };
   }
 
   @Roles(Role.CUSTOMER)
   @Get('my')
   @ApiOperation({ summary: 'Get authenticated customer orders' })
   @ApiResponse({ status: 200, description: 'Orders fetched' })
-  async findMyOrders(@CurrentUser('id') userId: string): Promise<HandlerResult<Order[]>> {
+  async findMyOrders(
+    @CurrentUser('id') userId: string,
+  ): Promise<HandlerResult<Order[]>> {
     const data = await this.ordersService.findMyOrders(userId);
     return { data };
   }
@@ -59,7 +77,9 @@ export class OrdersController {
   @Get()
   @ApiOperation({ summary: 'List all orders (staff)' })
   @ApiResponse({ status: 200, description: 'Orders fetched' })
-  async findAll(@Query() filters: OrderFiltersDto): Promise<HandlerResult<Order[]> & { meta: PaginationMeta }> {
+  async findAll(
+    @Query() filters: OrderFiltersDto,
+  ): Promise<HandlerResult<Order[]> & { meta: PaginationMeta }> {
     const result = await this.ordersService.findAll(filters);
     return { data: result.data, meta: result.meta };
   }
@@ -69,7 +89,9 @@ export class OrdersController {
   @ApiOperation({ summary: 'Get order by ID (staff)' })
   @ApiResponse({ status: 200, description: 'Order fetched' })
   @ApiResponse({ status: 404, description: 'Order not found' })
-  async findById(@Param('id', ParseUUIDPipe) id: string): Promise<HandlerResult<Order>> {
+  async findById(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<HandlerResult<Order>> {
     const data = await this.ordersService.findById(id);
     return { data };
   }
@@ -83,7 +105,12 @@ export class OrdersController {
     @Body() dto: ChangeStatusDto,
     @CurrentUser('id') userId: string,
   ): Promise<HandlerResult<Order>> {
-    const data = await this.ordersService.changeStatus(id, OrderStatus.CONFIRMED, userId, dto.note);
+    const data = await this.ordersService.changeStatus(
+      id,
+      OrderStatus.CONFIRMED,
+      userId,
+      dto.note,
+    );
     return { messageKey: 'UPDATED', data };
   }
 
@@ -96,7 +123,13 @@ export class OrdersController {
     @Body() dto: ChangeStatusDto,
     @CurrentUser('id') userId: string,
   ): Promise<HandlerResult<Order>> {
-    const data = await this.ordersService.changeStatus(id, OrderStatus.REJECTED, userId, dto.note, dto.rejectionReason);
+    const data = await this.ordersService.changeStatus(
+      id,
+      OrderStatus.REJECTED,
+      userId,
+      dto.note,
+      dto.rejectionReason,
+    );
     return { messageKey: 'UPDATED', data };
   }
 
@@ -109,7 +142,12 @@ export class OrdersController {
     @Body() dto: ChangeStatusDto,
     @CurrentUser('id') userId: string,
   ): Promise<HandlerResult<Order>> {
-    const data = await this.ordersService.changeStatus(id, OrderStatus.PREPARING, userId, dto.note);
+    const data = await this.ordersService.changeStatus(
+      id,
+      OrderStatus.PREPARING,
+      userId,
+      dto.note,
+    );
     return { messageKey: 'UPDATED', data };
   }
 
@@ -122,7 +160,12 @@ export class OrdersController {
     @Body() dto: ChangeStatusDto,
     @CurrentUser('id') userId: string,
   ): Promise<HandlerResult<Order>> {
-    const data = await this.ordersService.changeStatus(id, OrderStatus.SHIPPED, userId, dto.note);
+    const data = await this.ordersService.changeStatus(
+      id,
+      OrderStatus.SHIPPED,
+      userId,
+      dto.note,
+    );
     return { messageKey: 'UPDATED', data };
   }
 
@@ -135,7 +178,12 @@ export class OrdersController {
     @Body() dto: ChangeStatusDto,
     @CurrentUser('id') userId: string,
   ): Promise<HandlerResult<Order>> {
-    const data = await this.ordersService.changeStatus(id, OrderStatus.DELIVERED, userId, dto.note);
+    const data = await this.ordersService.changeStatus(
+      id,
+      OrderStatus.DELIVERED,
+      userId,
+      dto.note,
+    );
     return { messageKey: 'UPDATED', data };
   }
 
@@ -148,7 +196,12 @@ export class OrdersController {
     @Body() dto: ChangeStatusDto,
     @CurrentUser('id') userId: string,
   ): Promise<HandlerResult<Order>> {
-    const data = await this.ordersService.changeStatus(id, OrderStatus.CANCELLED, userId, dto.note);
+    const data = await this.ordersService.changeStatus(
+      id,
+      OrderStatus.CANCELLED,
+      userId,
+      dto.note,
+    );
     return { messageKey: 'UPDATED', data };
   }
 }
