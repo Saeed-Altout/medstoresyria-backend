@@ -34,6 +34,7 @@ export const Messages = {
   CATEGORY_SLUG_TAKEN: { en: 'Category slug is already in use', ar: 'معرف التصنيف مستخدم بالفعل' },
   CATEGORY_SLUG_EXISTS: { en: 'Category slug is already in use', ar: 'معرف التصنيف مستخدم بالفعل' },
   CATEGORY_PARENT_NOT_FOUND: { en: 'Parent category not found', ar: 'التصنيف الأب غير موجود' },
+  CATEGORY_IN_USE: { en: 'This category (or one of its subcategories) is assigned to active products. Remove the category from all products before deleting.', ar: 'هذا التصنيف (أو أحد تصنيفاته الفرعية) مرتبط بمنتجات نشطة. يرجى إزالة التصنيف من جميع المنتجات قبل الحذف.' },
   CATEGORY_CREATED: { en: 'Category created successfully', ar: 'تم إنشاء التصنيف بنجاح' },
   // Brands
   BRAND_NOT_FOUND: { en: 'Brand not found', ar: 'الماركة غير موجودة' },
