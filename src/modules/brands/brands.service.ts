@@ -10,6 +10,12 @@ import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 import { BrandNotFoundException, BrandSlugExistsException } from './exceptions/brand.exceptions';
 
+interface BrandTranslationDto {
+  locale: string;
+  name: string;
+  description: string | null;
+}
+
 interface BrandDto {
   id: string;
   slug: string;
@@ -17,6 +23,7 @@ interface BrandDto {
   website: string | null;
   name: string;
   description: string;
+  translations: BrandTranslationDto[];
 }
 
 @Injectable()
@@ -44,6 +51,11 @@ export class BrandsService {
         website: brand.website,
         name: row?.name ?? '',
         description: row?.description ?? '',
+        translations: (brand.translations ?? []).map((t) => ({
+          locale: t.locale,
+          name: t.name,
+          description: t.description,
+        })),
       };
     });
   }

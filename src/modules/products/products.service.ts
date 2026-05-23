@@ -144,7 +144,7 @@ export class ProductsService {
       .addOrderBy('pi.sort_order', 'ASC')
       .getOne();
 
-    if (!product || !product.is_active) throw new ProductNotFoundException();
+    if (!product) throw new ProductNotFoundException();
 
     const translationRow = getTranslationRow(product.translations, locale);
     const attrValues = (product.attribute_values as ProductAttributeValue[]).map((av) => ({
@@ -159,6 +159,7 @@ export class ProductsService {
       description: translationRow?.description ?? null,
       condition_report: translationRow?.condition_report ?? null,
       attributeValues: attrValues,
+      in_stock: product.stock_qty > 0,
     });
   }
 
@@ -221,6 +222,8 @@ export class ProductsService {
     if (dto.price_usd !== undefined) product.price_usd = dto.price_usd;
     if (dto.condition !== undefined) product.condition = dto.condition;
     if (dto.is_featured !== undefined) product.is_featured = dto.is_featured;
+    if (dto.is_active !== undefined) product.is_active = dto.is_active;
+    if (dto.stock_qty !== undefined) product.stock_qty = dto.stock_qty;
     if (dto.stock_min !== undefined) product.stock_min = dto.stock_min;
 
     if (dto.brandId !== undefined) {
@@ -351,7 +354,7 @@ export class ProductsService {
           locale: t.locale,
           name: t.name,
           description: t.description ?? null,
-          condition_report: t.specifications ?? null,
+          condition_report: t.condition_report ?? null,
           product: { id: productId },
         })
         .orUpdate(['name', 'description', 'condition_report'], ['productId', 'locale'])

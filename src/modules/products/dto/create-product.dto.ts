@@ -51,6 +51,11 @@ export class CreateProductDto {
   @IsBoolean()
   is_featured?: boolean;
 
+  @ApiPropertyOptional({ default: true })
+  @IsOptional()
+  @IsBoolean()
+  is_active?: boolean;
+
   @ApiProperty({ type: [UpsertProductTranslationDto] })
   @IsArray()
   @ValidateNested({ each: true })
