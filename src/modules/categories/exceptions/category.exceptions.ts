@@ -18,3 +18,9 @@ export class ParentCategoryNotFoundException extends AppException {
     super('CATEGORY_PARENT_NOT_FOUND', HttpStatus.NOT_FOUND);
   }
 }
+
+export class CategoryInUseException extends AppException {
+  constructor() {
+    super('CATEGORY_IN_USE', HttpStatus.CONFLICT);
+  }
+}

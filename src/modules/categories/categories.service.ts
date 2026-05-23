@@ -11,16 +11,27 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import {
   CategoryNotFoundException,
   CategorySlugExistsException,
+  CategoryInUseException,
   ParentCategoryNotFoundException,
 } from './exceptions/category.exceptions';
 
-interface CategoryNode {
+export type StatusFilter = 'active' | 'inactive' | 'all';
+
+interface CategoryTranslationDto {
+  locale: string;
+  name: string;
+  description: string | null;
+}
+
+export interface CategoryNode {
   id: string;
   slug: string;
   imageUrl: string | null;
   sortOrder: number;
+  isActive: boolean;
   name: string;
   description: string;
+  translations: CategoryTranslationDto[];
   children: CategoryNode[];
 }
 
@@ -28,32 +39,46 @@ interface CategoryNode {
 export class CategoriesService {
   constructor(
     @InjectRepository(Category)
-    private readonly categoryRepo: Repository<Category>,
-    @InjectRepository(Category)
-    private readonly treeRepo: TreeRepository<Category>,
+    private readonly repo: TreeRepository<Category>,
     @InjectRepository(CategoryTranslation)
     private readonly translationRepo: Repository<CategoryTranslation>,
   ) {}
 
-  async getTree(locale: string): Promise<CategoryNode[]> {
-    const trees = await this.treeRepo.findTrees({ relations: ['translations'] });
-    return trees.map((node) => this.mapNode(node, locale));
+  async getTree(locale: string, status: StatusFilter = 'active'): Promise<CategoryNode[]> {
+    // Load flat list filtered by is_active in the DB — avoids JS-side filtering bugs
+    const whereClause = status === 'all' ? {} : { is_active: status === 'active' };
+    const flat = await this.repo.find({
+      where: whereClause,
+      relations: ['translations', 'parent'],
+      order: { sort_order: 'ASC' },
+    });
+
+    // Reconstruct tree in memory from the flat list
+    return this.buildTree(flat, null, locale);
   }
 
-  private mapNode(node: Category, locale: string): CategoryNode {
-    return {
-      id: node.id,
-      slug: node.slug,
-      imageUrl: node.image_url,
-      sortOrder: node.sort_order,
-      name: getTranslated(node.translations, 'name', locale),
-      description: getTranslated(node.translations, 'description', locale),
-      children: (node.children ?? []).map((child) => this.mapNode(child, locale)),
-    };
+  private buildTree(flat: Category[], parentId: string | null, locale: string): CategoryNode[] {
+    return flat
+      .filter((c) => (c.parent?.id ?? null) === parentId)
+      .map((c) => ({
+        id: c.id,
+        slug: c.slug,
+        imageUrl: c.image_url,
+        sortOrder: c.sort_order,
+        isActive: c.is_active,
+        name: getTranslated(c.translations, 'name', locale),
+        description: getTranslated(c.translations, 'description', locale),
+        translations: (c.translations ?? []).map((t) => ({
+          locale: t.locale,
+          name: t.name,
+          description: t.description,
+        })),
+        children: this.buildTree(flat, c.id, locale),
+      }));
   }
 
   async findBySlug(slug: string, locale: string): Promise<Category & { name: string; description: string }> {
-    const category = await this.categoryRepo.findOne({
+    const category = await this.repo.findOne({
       where: { slug, is_active: true },
       relations: ['translations', 'attribute_definitions', 'attribute_definitions.translations'],
     });
@@ -66,63 +91,87 @@ export class CategoriesService {
     });
   }
 
-  async create(dto: CreateCategoryDto): Promise<Category> {
-    const slugTaken = await this.categoryRepo.findOne({ where: { slug: dto.slug } });
+  async create(dto: CreateCategoryDto, locale: string = 'en'): Promise<CategoryNode> {
+    const slugTaken = await this.repo.findOne({ where: { slug: dto.slug } });
     if (slugTaken) throw new CategorySlugExistsException();
 
     let parent: Category | null = null;
     if (dto.parentId) {
-      parent = await this.categoryRepo.findOne({ where: { id: dto.parentId } });
+      parent = await this.repo.findOne({ where: { id: dto.parentId } });
       if (!parent) throw new ParentCategoryNotFoundException();
     }
 
-    const category = this.categoryRepo.create({
+    const category = this.repo.create({
       slug: dto.slug,
       image_url: dto.imageUrl ?? null,
       sort_order: dto.sortOrder ?? 0,
       parent,
     });
-    await this.categoryRepo.save(category);
+    await this.repo.save(category);
     await this.upsertTranslations(category.id, dto.translations);
-    return category;
+
+    // Reload with translations to return consistent shape
+    const saved = await this.repo.findOne({
+      where: { id: category.id },
+      relations: ['translations'],
+    });
+    return this.toNode(saved!, locale);
   }
 
-  async update(id: string, dto: UpdateCategoryDto): Promise<Category> {
-    const category = await this.categoryRepo.findOne({ where: { id } });
+  async update(id: string, dto: UpdateCategoryDto, locale: string = 'en'): Promise<CategoryNode> {
+    const category = await this.repo.findOne({ where: { id }, relations: ['parent'] });
     if (!category) throw new CategoryNotFoundException();
 
     if (dto.slug && dto.slug !== category.slug) {
-      const slugTaken = await this.categoryRepo.findOne({ where: { slug: dto.slug } });
+      const slugTaken = await this.repo.findOne({ where: { slug: dto.slug } });
       if (slugTaken) throw new CategorySlugExistsException();
       category.slug = dto.slug;
     }
 
     if (dto.imageUrl !== undefined) category.image_url = dto.imageUrl ?? null;
     if (dto.sortOrder !== undefined) category.sort_order = dto.sortOrder;
+    if (dto.isActive !== undefined) category.is_active = dto.isActive;
 
     if (dto.parentId !== undefined) {
       if (dto.parentId === null) {
         category.parent = null;
       } else {
-        const parent = await this.categoryRepo.findOne({ where: { id: dto.parentId } });
+        const parent = await this.repo.findOne({ where: { id: dto.parentId } });
         if (!parent) throw new ParentCategoryNotFoundException();
         category.parent = parent;
       }
     }
 
-    await this.categoryRepo.save(category);
+    await this.repo.save(category);
 
     if (dto.translations?.length) {
       await this.upsertTranslations(category.id, dto.translations);
     }
 
-    return category;
+    const saved = await this.repo.findOne({
+      where: { id: category.id },
+      relations: ['translations'],
+    });
+    return this.toNode(saved!, locale);
   }
 
-  async softDelete(id: string): Promise<void> {
-    const category = await this.categoryRepo.findOne({ where: { id } });
+  async hardDelete(id: string): Promise<void> {
+    const category = await this.repo.findOne({ where: { id } });
     if (!category) throw new CategoryNotFoundException();
-    await this.categoryRepo.update(id, { is_active: false });
+
+    const descendants = await this.repo.findDescendants(category);
+    const allIds = descendants.map((c) => c.id);
+
+    const usedCount = await this.repo
+      .createQueryBuilder('c')
+      .innerJoin('c.products', 'p')
+      .where('c.id IN (:...ids)', { ids: allIds })
+      .getCount();
+
+    if (usedCount > 0) throw new CategoryInUseException();
+
+    // Use treeRepo so TypeORM cleans up the closure table correctly
+    await this.repo.remove(descendants);
   }
 
   async upsertTranslations(categoryId: string, translations: UpsertTranslationDto[]): Promise<void> {
@@ -143,5 +192,24 @@ export class CategoriesService {
         .orUpdate(['name', 'description'], ['categoryId', 'locale'])
         .execute();
     }
+  }
+
+  private toNode(category: Category, locale: string): CategoryNode {
+    const row = getTranslationRow(category.translations, locale);
+    return {
+      id: category.id,
+      slug: category.slug,
+      imageUrl: category.image_url,
+      sortOrder: category.sort_order,
+      isActive: category.is_active,
+      name: row?.name ?? '',
+      description: row?.description ?? '',
+      translations: (category.translations ?? []).map((t) => ({
+        locale: t.locale,
+        name: t.name,
+        description: t.description,
+      })),
+      children: [],
+    };
   }
 }
