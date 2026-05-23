@@ -22,7 +22,7 @@ import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/enums/role.enum';
 import type { HandlerResult } from '../../common/interceptors/response.interceptor';
-import { UpsertAttributeTranslationDto } from '../../common/dto/upsert-translation.dto';
+import { UpsertAttributeTranslationsBodyDto } from '../../common/dto/upsert-translation.dto';
 import { AttributesService } from './attributes.service';
 import { CreateAttributeDto } from './dto/create-attribute.dto';
 import { UpdateAttributeDto } from './dto/update-attribute.dto';
@@ -86,9 +86,9 @@ export class AttributesController {
   @ApiResponse({ status: 200 })
   async upsertTranslations(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() translations: UpsertAttributeTranslationDto[],
+    @Body() body: UpsertAttributeTranslationsBodyDto,
   ): Promise<HandlerResult<null>> {
-    await this.attributesService.upsertTranslations(id, translations);
+    await this.attributesService.upsertTranslations(id, body.translations);
     return { messageKey: 'UPDATED', data: null };
   }
 }

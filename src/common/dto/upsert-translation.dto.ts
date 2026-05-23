@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsLocale, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsArray, IsLocale, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class UpsertTranslationDto {
   @ApiProperty({ example: 'en', description: 'BCP-47 locale code' })
@@ -44,7 +45,23 @@ export class UpsertProductTranslationDto {
   @IsOptional()
   @IsString()
   @MaxLength(5000)
-  specifications?: string;
+  condition_report?: string;
+}
+
+export class UpsertProductTranslationsBodyDto {
+  @ApiProperty({ type: [UpsertProductTranslationDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => UpsertProductTranslationDto)
+  translations: UpsertProductTranslationDto[];
+}
+
+export class UpsertTranslationsBodyDto {
+  @ApiProperty({ type: [UpsertTranslationDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => UpsertTranslationDto)
+  translations: UpsertTranslationDto[];
 }
 
 export class UpsertAttributeTranslationDto {
@@ -59,4 +76,12 @@ export class UpsertAttributeTranslationDto {
   @IsNotEmpty()
   @MaxLength(255)
   name: string;
+}
+
+export class UpsertAttributeTranslationsBodyDto {
+  @ApiProperty({ type: [UpsertAttributeTranslationDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => UpsertAttributeTranslationDto)
+  translations: UpsertAttributeTranslationDto[];
 }

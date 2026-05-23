@@ -28,7 +28,7 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Role } from '../../common/enums/role.enum';
 import type { HandlerResult } from '../../common/interceptors/response.interceptor';
-import { UpsertProductTranslationDto } from '../../common/dto/upsert-translation.dto';
+import { UpsertProductTranslationsBodyDto } from '../../common/dto/upsert-translation.dto';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -172,9 +172,9 @@ export class ProductsController {
   @ApiResponse({ status: 200 })
   async upsertTranslations(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() translations: UpsertProductTranslationDto[],
+    @Body() body: UpsertProductTranslationsBodyDto,
   ): Promise<HandlerResult<null>> {
-    await this.productsService.upsertTranslations(id, translations);
+    await this.productsService.upsertTranslations(id, body.translations);
     return { messageKey: 'UPDATED', data: null };
   }
 }

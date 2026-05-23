@@ -187,9 +187,9 @@ export class OrdersController {
     return { messageKey: 'UPDATED', data };
   }
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SALES)
   @Patch(':id/cancel')
-  @ApiOperation({ summary: 'Cancel an order (admin only, before shipped)' })
+  @ApiOperation({ summary: 'Cancel an order (admin or sales, before shipped)' })
   @ApiResponse({ status: 200, description: 'Order cancelled' })
   async cancel(
     @Param('id', ParseUUIDPipe) id: string,

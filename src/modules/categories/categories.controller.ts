@@ -9,11 +9,13 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   Req,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -22,8 +24,9 @@ import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/enums/role.enum';
 import type { HandlerResult } from '../../common/interceptors/response.interceptor';
-import { UpsertTranslationDto } from '../../common/dto/upsert-translation.dto';
+import { UpsertTranslationsBodyDto } from '../../common/dto/upsert-translation.dto';
 import { CategoriesService } from './categories.service';
+import type { StatusFilter } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
@@ -35,9 +38,15 @@ export class CategoriesController {
   @Public()
   @Get()
   @ApiOperation({ summary: 'Get full category tree' })
+  @ApiQuery({ name: 'status', enum: ['active', 'inactive', 'all'], required: false })
   @ApiResponse({ status: 200, description: 'Category tree returned' })
-  async getTree(@Req() req: Request): Promise<HandlerResult<unknown[]>> {
-    const data = await this.categoriesService.getTree(req.locale ?? 'en');
+  async getTree(
+    @Req() req: Request,
+    @Query('status') status?: string,
+  ): Promise<HandlerResult<unknown[]>> {
+    const statusFilter: StatusFilter =
+      status === 'inactive' ? 'inactive' : status === 'all' ? 'all' : 'active';
+    const data = await this.categoriesService.getTree(req.locale ?? 'en', statusFilter);
     return { messageKey: 'SUCCESS', data };
   }
 
@@ -60,8 +69,11 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Create a category' })
   @ApiResponse({ status: 201 })
   @ApiResponse({ status: 409, description: 'Slug already in use' })
-  async create(@Body() dto: CreateCategoryDto): Promise<HandlerResult<unknown>> {
-    const data = await this.categoriesService.create(dto);
+  async create(
+    @Body() dto: CreateCategoryDto,
+    @Req() req: Request,
+  ): Promise<HandlerResult<unknown>> {
+    const data = await this.categoriesService.create(dto, req.locale ?? 'en');
     return { messageKey: 'CATEGORY_CREATED', statusCode: HttpStatus.CREATED, data };
   }
 
@@ -73,8 +85,9 @@ export class CategoriesController {
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateCategoryDto,
+    @Req() req: Request,
   ): Promise<HandlerResult<unknown>> {
-    const data = await this.categoriesService.update(id, dto);
+    const data = await this.categoriesService.update(id, dto, req.locale ?? 'en');
     return { messageKey: 'UPDATED', data };
   }
 
@@ -82,10 +95,11 @@ export class CategoriesController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Soft-delete a category' })
+  @ApiOperation({ summary: 'Hard-delete a category and its children' })
   @ApiResponse({ status: 200 })
-  async softDelete(@Param('id', ParseUUIDPipe) id: string): Promise<HandlerResult<null>> {
-    await this.categoriesService.softDelete(id);
+  @ApiResponse({ status: 409, description: 'Category in use by products' })
+  async hardDelete(@Param('id', ParseUUIDPipe) id: string): Promise<HandlerResult<null>> {
+    await this.categoriesService.hardDelete(id);
     return { messageKey: 'DELETED', data: null };
   }
 
@@ -96,9 +110,9 @@ export class CategoriesController {
   @ApiResponse({ status: 200 })
   async upsertTranslations(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() translations: UpsertTranslationDto[],
+    @Body() body: UpsertTranslationsBodyDto,
   ): Promise<HandlerResult<null>> {
-    await this.categoriesService.upsertTranslations(id, translations);
+    await this.categoriesService.upsertTranslations(id, body.translations);
     return { messageKey: 'UPDATED', data: null };
   }
 }

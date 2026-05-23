@@ -22,7 +22,7 @@ import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/enums/role.enum';
 import type { HandlerResult } from '../../common/interceptors/response.interceptor';
-import { UpsertTranslationDto } from '../../common/dto/upsert-translation.dto';
+import { UpsertTranslationsBodyDto } from '../../common/dto/upsert-translation.dto';
 import { BrandsService } from './brands.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
@@ -96,9 +96,9 @@ export class BrandsController {
   @ApiResponse({ status: 200 })
   async upsertTranslations(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() translations: UpsertTranslationDto[],
+    @Body() body: UpsertTranslationsBodyDto,
   ): Promise<HandlerResult<null>> {
-    await this.brandsService.upsertTranslations(id, translations);
+    await this.brandsService.upsertTranslations(id, body.translations);
     return { messageKey: 'UPDATED', data: null };
   }
 }
