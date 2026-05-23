@@ -73,18 +73,25 @@ export class InventoryService {
     const products = await this.productRepo
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.translations', 'pt')
+      .leftJoinAndSelect('p.category', 'cat')
+      .leftJoinAndSelect('cat.translations', 'catt')
       .where('p.is_active = true')
       .andWhere('p.stock_qty <= p.stock_min')
+      .orderBy('p.stock_qty', 'ASC')
       .getMany();
 
     return products.map((p) => {
       const row = getTranslationRow(p.translations, locale);
+      const catRow = getTranslationRow((p.category as { translations?: { locale: string; name: string }[] } | null)?.translations ?? [], locale);
+      const status: 'low' | 'out' = p.stock_qty === 0 ? 'out' : 'low';
       return {
         id: p.id,
         slug: p.slug,
         stock_qty: p.stock_qty,
         stock_min: p.stock_min,
         name: row?.name ?? '',
+        category: catRow?.name ?? null,
+        status,
       };
     });
   }
