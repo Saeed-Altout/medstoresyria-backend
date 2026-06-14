@@ -42,8 +42,13 @@ export class AuthController {
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<HandlerResult<{ accessToken: string; user: Partial<User> }>> {
-    const { user, accessToken, refreshToken } = await this.authService.register(dto);
-    res.cookie('refresh_token', refreshToken, this.authService.getCookieOptions());
+    const { user, accessToken, refreshToken } =
+      await this.authService.register(dto);
+    res.cookie(
+      'refresh_token',
+      refreshToken,
+      this.authService.getCookieOptions(),
+    );
     return {
       messageKey: 'CREATED',
       statusCode: HttpStatus.CREATED,
@@ -61,8 +66,13 @@ export class AuthController {
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<HandlerResult<{ accessToken: string; user: Partial<User> }>> {
-    const { user, accessToken, refreshToken } = await this.authService.login(dto);
-    res.cookie('refresh_token', refreshToken, this.authService.getCookieOptions());
+    const { user, accessToken, refreshToken } =
+      await this.authService.login(dto);
+    res.cookie(
+      'refresh_token',
+      refreshToken,
+      this.authService.getCookieOptions(),
+    );
     return {
       messageKey: 'SUCCESS',
       data: { accessToken, user: this.sanitizeUser(user) },
@@ -79,8 +89,13 @@ export class AuthController {
     @CurrentUser() user: User,
     @Res({ passthrough: true }) res: Response,
   ): Promise<HandlerResult<{ accessToken: string }>> {
-    const { accessToken, refreshToken } = await this.authService.refreshTokens(user);
-    res.cookie('refresh_token', refreshToken, this.authService.getCookieOptions());
+    const { accessToken, refreshToken } =
+      await this.authService.refreshTokens(user);
+    res.cookie(
+      'refresh_token',
+      refreshToken,
+      this.authService.getCookieOptions(),
+    );
     return { messageKey: 'SUCCESS', data: { accessToken } };
   }
 
@@ -117,13 +132,27 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth2 callback' })
   async googleCallback(
-    @Req() req: Request & { user: { google_id: string; email: string; first_name: string; last_name: string } },
+    @Req()
+    req: Request & {
+      user: {
+        google_id: string;
+        email: string;
+        first_name: string;
+        last_name: string;
+      };
+    },
     @Res() res: Response,
   ): Promise<void> {
-    const { accessToken, refreshToken } = await this.authService.googleLogin(req.user);
-    res.cookie('refresh_token', refreshToken, this.authService.getCookieOptions());
+    const { accessToken, refreshToken } = await this.authService.googleLogin(
+      req.user,
+    );
+    res.cookie(
+      'refresh_token',
+      refreshToken,
+      this.authService.getCookieOptions(),
+    );
     const frontendUrl = process.env['FRONTEND_URL'] ?? 'http://localhost:5173';
-    res.redirect(`${frontendUrl}/auth/callback?token=${accessToken}`);
+    res.redirect(`${frontendUrl}/callback?token=${accessToken}`);
   }
 
   private sanitizeUser(user: User): Partial<User> {
