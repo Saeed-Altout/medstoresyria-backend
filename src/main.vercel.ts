@@ -21,6 +21,8 @@ async function createApp() {
       const allowedOrigins = [
         (config.get('FRONTEND_URL') as string) ?? 'http://localhost:3001',
         (config.get('DASHBOARD_URL') as string) ?? 'http://localhost:3002',
+        (config.get('FRONTEND_PROD_URL') as string) ?? 'https://medstoresyria-website.vercel.app',
+        (config.get('DASHBOARD_PROD_URL') as string) ?? 'https://medstoresyria-dashboard.vercel.app',
       ];
 
       app.enableCors({

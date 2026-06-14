@@ -17,6 +17,8 @@ async function bootstrap(): Promise<void> {
   const allowedOrigins = [
     config.get<string>('FRONTEND_URL') ?? 'http://localhost:5173',
     config.get<string>('DASHBOARD_URL') ?? 'http://localhost:5174',
+    config.get<string>('FRONTEND_PROD_URL') ?? 'https://medstoresyria-website.vercel.app',
+    config.get<string>('DASHBOARD_PROD_URL') ?? 'https://medstoresyria-dashboard.vercel.app',
   ];
 
   const isDev = config.get<string>('NODE_ENV') !== 'production';
