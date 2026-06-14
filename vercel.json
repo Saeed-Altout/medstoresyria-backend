@@ -1,12 +1,11 @@
 {
   "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "builds": [
     {
       "src": "src/main.vercel.ts",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["src/**/*", "dist/**/*"]
-      }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
@@ -14,5 +13,8 @@
       "src": "/(.*)",
       "dest": "src/main.vercel.ts"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
