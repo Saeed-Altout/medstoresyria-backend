@@ -8,6 +8,7 @@ import { generateOrderNumber } from '../../common/utils/generators.util';
 import { OrderStatus } from '../../common/enums/order-status.enum';
 import { Product } from '../products/entities/product.entity';
 import { Governorate } from '../delivery/entities/governorate.entity';
+import { InventoryLog } from '../inventory/entities/inventory-log.entity';
 import { InventoryService } from '../inventory/inventory.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { Order } from './entities/order.entity';
@@ -79,14 +80,16 @@ export class OrdersService {
       }
 
       // 2. Deduct stock (pessimistic lock inside, throws InsufficientStockException)
+      const inventoryLogIds: string[] = [];
       for (const item of dto.items) {
-        await this.inventoryService.deductStock(
+        const logId = await this.inventoryService.deductStock(
           item.product_id,
           item.quantity,
-          'pending', // placeholder — replaced after order save
-          userId ?? 'guest',
+          null,
+          userId ?? null,
           queryRunner,
         );
+        inventoryLogIds.push(logId);
       }
 
       // 3. Governorate fee
@@ -122,6 +125,14 @@ export class OrdersService {
         user: userId ? { id: userId } : null,
       });
       await queryRunner.manager.save(Order, order);
+
+      // 5b. Back-fill real order ID into the inventory logs just created
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update(InventoryLog)
+        .set({ reference_id: order.id })
+        .where('id IN (:...ids)', { ids: inventoryLogIds })
+        .execute();
 
       // 6. Save order items with snapshots
       for (const item of dto.items) {

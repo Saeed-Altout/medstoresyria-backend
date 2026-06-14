@@ -120,16 +120,15 @@ export class InventoryService {
   async deductStock(
     productId: string,
     quantity: number,
-    orderId: string,
-    userId: string,
+    orderId: string | null,
+    userId: string | null,
     queryRunner: QueryRunner,
-  ): Promise<void> {
-    const product = await queryRunner.manager
-      .createQueryBuilder(Product, 'p')
-      .setLock('pessimistic_write')
-      .where('p.id = :id', { id: productId })
-      .leftJoinAndSelect('p.translations', 'pt')
-      .getOne();
+  ): Promise<string> {
+    // Fetch current product state (with translations for error messages)
+    const product = await queryRunner.manager.findOne(Product, {
+      where: { id: productId },
+      relations: ['translations'],
+    });
 
     if (!product) throw new InsufficientStockException('unknown');
 
@@ -138,19 +137,28 @@ export class InventoryService {
       throw new InsufficientStockException(row?.name ?? product.slug);
     }
 
-    await queryRunner.manager.update(Product, productId, {
-      stock_qty: product.stock_qty - quantity,
-    });
+    // Atomic decrement — WHERE clause prevents overselling without needing FOR UPDATE lock
+    const result = await queryRunner.manager
+      .createQueryBuilder()
+      .update(Product)
+      .set({ stock_qty: () => `stock_qty - ${quantity}` })
+      .where('id = :id AND stock_qty >= :qty', { id: productId, qty: quantity })
+      .execute();
 
-    await queryRunner.manager.save(
+    if (result.affected === 0) {
+      throw new InsufficientStockException(row?.name ?? product.slug);
+    }
+
+    const log = await queryRunner.manager.save(
       queryRunner.manager.create(InventoryLog, {
         type: InventoryLogType.OUT,
         quantity,
         reason: InventoryLogReason.ORDER,
-        reference_id: orderId,
+        reference_id: orderId ?? null,
         product: { id: productId },
-        user: { id: userId },
+        user: userId ? { id: userId } : null,
       }),
     );
+    return log.id;
   }
 }
