@@ -9,6 +9,7 @@ export const Messages = {
   UNAUTHORIZED: { en: 'Unauthorized', ar: 'غير مصرح' },
   FORBIDDEN: { en: 'Forbidden', ar: 'ممنوع' },
   INTERNAL_ERROR: { en: 'Internal server error', ar: 'خطأ داخلي في الخادم' },
+  FILE_UPLOADED: { en: 'File uploaded successfully', ar: 'تم رفع الملف بنجاح' },
   // Auth
   AUTH_INVALID_CREDENTIALS: { en: 'Invalid email or password', ar: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' },
   AUTH_EMAIL_TAKEN: { en: 'Email is already in use', ar: 'البريد الإلكتروني مستخدم بالفعل' },
