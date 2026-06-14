@@ -13,8 +13,12 @@ export class DeliveryService {
     private readonly governorateRepo: Repository<Governorate>,
   ) {}
 
-  async findAll(): Promise<Governorate[]> {
-    return this.governorateRepo.find({ where: { is_active: true }, order: { name: 'ASC' } });
+  async findAll(status?: 'active' | 'inactive' | 'all'): Promise<Governorate[]> {
+    const where =
+      status === 'all'      ? {} :
+      status === 'inactive' ? { is_active: false } :
+                              { is_active: true };
+    return this.governorateRepo.find({ where, order: { name: 'ASC' } });
   }
 
   async findById(id: string): Promise<Governorate> {

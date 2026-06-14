@@ -11,6 +11,7 @@ import { AttributeDefinition } from '../attributes/entities/attribute-definition
 import { AttributeTranslation } from '../attributes/entities/attribute-translation.entity';
 import { ProductAttributeValue } from '../attributes/entities/product-attribute-value.entity';
 import { InventoryLog } from '../inventory/entities/inventory-log.entity';
+import { Review } from '../reviews/entities/review.entity';
 import { StorageModule } from '../storage/storage.module';
 import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
@@ -29,6 +30,7 @@ import { ProductsController } from './products.controller';
       AttributeTranslation,
       ProductAttributeValue,
       InventoryLog,
+      Review,
     ]),
     StorageModule,
   ],

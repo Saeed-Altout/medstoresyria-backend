@@ -82,6 +82,11 @@ export const Messages = {
   USER_DEACTIVATED: { en: 'User deactivated successfully', ar: 'تم تعطيل المستخدم بنجاح' },
   // Reports
   REPORTS_FETCHED: { en: 'Report generated successfully', ar: 'تم إنشاء التقرير بنجاح' },
+  // Reviews
+  REVIEW_CREATED: { en: 'Review submitted and is pending approval', ar: 'تم إرسال التقييم وهو بانتظار الموافقة' },
+  REVIEW_APPROVED: { en: 'Review approved', ar: 'تمت الموافقة على التقييم' },
+  REVIEW_REJECTED: { en: 'Review removed', ar: 'تمت إزالة التقييم' },
+  REVIEW_NOT_FOUND: { en: 'Review not found', ar: 'التقييم غير موجود' },
 } as const;
 
 export type MessageKey = keyof typeof Messages;

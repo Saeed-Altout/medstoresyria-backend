@@ -12,6 +12,7 @@ import { Category } from '../categories/entities/category.entity';
 import { AttributeDefinition } from '../attributes/entities/attribute-definition.entity';
 import { ProductAttributeValue } from '../attributes/entities/product-attribute-value.entity';
 import { InventoryLog, InventoryLogReason, InventoryLogType } from '../inventory/entities/inventory-log.entity';
+import { Review } from '../reviews/entities/review.entity';
 import { Product } from './entities/product.entity';
 import { ProductImage } from './entities/product-image.entity';
 import { ProductTranslation } from './entities/product-translation.entity';
@@ -47,9 +48,27 @@ export class ProductsService {
     @InjectRepository(InventoryLog) private readonly inventoryLogRepo: Repository<InventoryLog>,
     @InjectRepository(Brand) private readonly brandRepo: Repository<Brand>,
     @InjectRepository(Category) private readonly categoryRepo: Repository<Category>,
+    @InjectRepository(Review) private readonly reviewRepo: Repository<Review>,
     private readonly storageService: StorageService,
     private readonly dataSource: DataSource,
   ) {}
+
+  /** Aggregate approved-review rating for a product. */
+  private async getRatingAggregate(
+    productId: string,
+  ): Promise<{ rating_average: number; rating_count: number }> {
+    const raw = await this.reviewRepo
+      .createQueryBuilder('r')
+      .select('AVG(r.rating)', 'avg')
+      .addSelect('COUNT(*)', 'count')
+      .where('r.productId = :pid', { pid: productId })
+      .andWhere('r.is_approved = :approved', { approved: true })
+      .getRawOne<{ avg: string | null; count: string }>();
+
+    const count = Number(raw?.count ?? 0);
+    const avg = raw?.avg ? Math.round(Number(raw.avg) * 10) / 10 : 0;
+    return { rating_average: avg, rating_count: count };
+  }
 
   async findAll(filters: ProductFiltersDto): Promise<{ data: MappedProduct[]; meta: PaginationMeta }> {
     const locale = filters.locale ?? 'en';
@@ -154,12 +173,22 @@ export class ProductsService {
       value: av.value,
     }));
 
+    const rating = await this.getRatingAggregate(product.id);
+
     return Object.assign(product, {
       name: translationRow?.name ?? '',
       description: translationRow?.description ?? null,
       condition_report: translationRow?.condition_report ?? null,
+      translations: (product.translations ?? []).map((t) => ({
+        locale: t.locale,
+        name: t.name,
+        description: t.description ?? null,
+        condition_report: t.condition_report ?? null,
+      })),
       attributeValues: attrValues,
       in_stock: product.stock_qty > 0,
+      rating_average: rating.rating_average,
+      rating_count: rating.rating_count,
     });
   }
 

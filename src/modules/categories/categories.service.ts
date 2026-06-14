@@ -35,6 +35,16 @@ export interface CategoryNode {
   children: CategoryNode[];
 }
 
+export interface PaginatedCategories {
+  data: CategoryNode[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 @Injectable()
 export class CategoriesService {
   constructor(
@@ -44,23 +54,37 @@ export class CategoriesService {
     private readonly translationRepo: Repository<CategoryTranslation>,
   ) {}
 
-  async getTree(locale: string, status: StatusFilter = 'active'): Promise<CategoryNode[]> {
-    // Load flat list filtered by is_active in the DB — avoids JS-side filtering bugs
-    const whereClause = status === 'all' ? {} : { is_active: status === 'active' };
-    const flat = await this.repo.find({
-      where: whereClause,
-      relations: ['translations', 'parent'],
-      order: { sort_order: 'ASC' },
-    });
+  async getTree(
+    locale: string,
+    status: StatusFilter = 'active',
+    search?: string,
+    page = 1,
+    limit = 10,
+  ): Promise<PaginatedCategories> {
+    const isActiveFilter = status === 'all' ? undefined : status === 'active';
 
-    // Reconstruct tree in memory from the flat list
-    return this.buildTree(flat, null, locale);
-  }
+    // When searching, query via translation join — returns flat filtered list (no tree)
+    if (search?.trim()) {
+      const qb = this.repo
+        .createQueryBuilder('c')
+        .leftJoinAndSelect('c.translations', 't')
+        .leftJoinAndSelect('c.parent', 'parent')
+        .leftJoinAndSelect('parent.translations', 'pt')
+        .where('t.name ILIKE :search', { search: `%${search.trim()}%` });
 
-  private buildTree(flat: Category[], parentId: string | null, locale: string): CategoryNode[] {
-    return flat
-      .filter((c) => (c.parent?.id ?? null) === parentId)
-      .map((c) => ({
+      if (isActiveFilter !== undefined) {
+        qb.andWhere('c.is_active = :isActive', { isActive: isActiveFilter });
+      }
+
+      qb.orderBy('c.sort_order', 'ASC');
+
+      const total = await qb.getCount();
+      const flat = await qb
+        .skip((page - 1) * limit)
+        .take(limit)
+        .getMany();
+
+      const data = flat.map((c) => ({
         id: c.id,
         slug: c.slug,
         imageUrl: c.image_url,
@@ -73,8 +97,39 @@ export class CategoriesService {
           name: t.name,
           description: t.description,
         })),
-        children: this.buildTree(flat, c.id, locale),
+        children: [],
       }));
+
+      return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+    }
+
+    // No search — paginate root-level categories and their children
+    const whereClause = isActiveFilter !== undefined ? { is_active: isActiveFilter } : {};
+    const [flat, total] = await this.repo.findAndCount({
+      where: whereClause,
+      relations: ['translations', 'parent'],
+      order: { sort_order: 'ASC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    const data = flat.map((c) => ({
+      id: c.id,
+      slug: c.slug,
+      imageUrl: c.image_url,
+      sortOrder: c.sort_order,
+      isActive: c.is_active,
+      name: getTranslated(c.translations, 'name', locale),
+      description: getTranslated(c.translations, 'description', locale),
+      translations: (c.translations ?? []).map((t) => ({
+        locale: t.locale,
+        name: t.name,
+        description: t.description,
+      })),
+      children: [],
+    }));
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
   }
 
   async findBySlug(slug: string, locale: string): Promise<Category & { name: string; description: string }> {

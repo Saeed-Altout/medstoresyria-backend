@@ -6,8 +6,9 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/enums/role.enum';
@@ -24,10 +25,13 @@ export class DeliveryController {
 
   @Public()
   @Get()
-  @ApiOperation({ summary: 'List all active governorates' })
+  @ApiOperation({ summary: 'List governorates' })
+  @ApiQuery({ name: 'status', enum: ['active', 'inactive', 'all'], required: false })
   @ApiResponse({ status: 200, description: 'Governorates fetched' })
-  async findAll(): Promise<HandlerResult<Governorate[]>> {
-    const data = await this.deliveryService.findAll();
+  async findAll(
+    @Query('status') status?: 'active' | 'inactive' | 'all',
+  ): Promise<HandlerResult<Governorate[]>> {
+    const data = await this.deliveryService.findAll(status);
     return { data };
   }
 

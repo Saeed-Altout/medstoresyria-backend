@@ -37,17 +37,29 @@ export class CategoriesController {
 
   @Public()
   @Get()
-  @ApiOperation({ summary: 'Get full category tree' })
+  @ApiOperation({ summary: 'Get category list with search and pagination' })
   @ApiQuery({ name: 'status', enum: ['active', 'inactive', 'all'], required: false })
-  @ApiResponse({ status: 200, description: 'Category tree returned' })
+  @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiResponse({ status: 200, description: 'Categories returned' })
   async getTree(
     @Req() req: Request,
     @Query('status') status?: string,
-  ): Promise<HandlerResult<unknown[]>> {
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ): Promise<HandlerResult<unknown>> {
     const statusFilter: StatusFilter =
       status === 'inactive' ? 'inactive' : status === 'all' ? 'all' : 'active';
-    const data = await this.categoriesService.getTree(req.locale ?? 'en', statusFilter);
-    return { messageKey: 'SUCCESS', data };
+    const result = await this.categoriesService.getTree(
+      req.locale ?? 'en',
+      statusFilter,
+      search,
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 10,
+    );
+    return { messageKey: 'SUCCESS', data: result };
   }
 
   @Public()

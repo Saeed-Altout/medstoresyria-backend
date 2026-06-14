@@ -20,6 +20,7 @@ import { MaintenanceModule } from './modules/maintenance/maintenance.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ReportsModule } from './modules/reports/reports.module';
     NotificationsModule,
     SettingsModule,
     ReportsModule,
+    ReviewsModule,
   ],
   providers: [
     {
