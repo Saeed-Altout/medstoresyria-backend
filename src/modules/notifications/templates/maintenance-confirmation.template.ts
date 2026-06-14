@@ -14,7 +14,7 @@ const VISIT_TYPE_LABELS: Record<VisitType, { en: string; ar: string }> = {
   [VisitType.OFFICE]: { en: 'Office Visit', ar: 'زيارة مكتبية' },
 };
 
-export function maintenanceConfirmationTemplate(request: MaintenanceForEmail, locale: string = 'en'): string {
+export function maintenanceConfirmationTemplate(request: MaintenanceForEmail, locale: string = 'en', baseUrl: string = 'https://medstoresyria-website.vercel.app'): string {
   const isAr = locale.startsWith('ar');
 
   const headingText = isAr ? 'تم استلام طلب الصيانة' : 'Maintenance Request Received';
@@ -42,7 +42,7 @@ export function maintenanceConfirmationTemplate(request: MaintenanceForEmail, lo
     ? 'سيتواصل معك فريقنا خلال 24 ساعة لتأكيد الموعد.'
     : 'Our team will contact you within 24 hours to confirm the appointment.';
 
-  const trackUrl = `https://medstore.sy/maintenance/track/${request.request_number}`;
+  const trackUrl = `${baseUrl}/${locale}/maintenance/track/${request.request_number}`;
   const btnText = isAr ? 'تتبع طلبك' : 'Track your request';
 
   const content = [

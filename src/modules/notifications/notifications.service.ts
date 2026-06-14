@@ -119,7 +119,8 @@ export class NotificationsService {
       ? `تم تأكيد طلبك #${order.order_number}`
       : `Order Confirmed #${order.order_number}`;
 
-    void this.send(order.customer_email, subject, orderConfirmationTemplate(order, locale));
+    const frontendUrl = this.config.get<string>('FRONTEND_PROD_URL', 'https://medstoresyria-website.vercel.app');
+    void this.send(order.customer_email, subject, orderConfirmationTemplate(order, locale, frontendUrl));
 
     if (order.user?.id) {
       const translations: NotificationTranslation[] = [
@@ -137,7 +138,8 @@ export class NotificationsService {
       ? `تحديث حالة الطلب #${order.order_number}`
       : `Order Status Update #${order.order_number}`;
 
-    void this.send(order.customer_email, subject, orderStatusTemplate(order, locale));
+    const frontendUrl = this.config.get<string>('FRONTEND_PROD_URL', 'https://medstoresyria-website.vercel.app');
+    void this.send(order.customer_email, subject, orderStatusTemplate(order, locale, frontendUrl));
 
     if (order.user?.id) {
       const translations: NotificationTranslation[] = [
@@ -155,7 +157,8 @@ export class NotificationsService {
       ? `تم استلام طلب الصيانة #${request.request_number}`
       : `Maintenance Request Received #${request.request_number}`;
 
-    void this.send(request.customer_email, subject, maintenanceConfirmationTemplate(request, locale));
+    const frontendUrl = this.config.get<string>('FRONTEND_PROD_URL', 'https://medstoresyria-website.vercel.app');
+    void this.send(request.customer_email, subject, maintenanceConfirmationTemplate(request, locale, frontendUrl));
 
     if (request.user?.id) {
       const translations: NotificationTranslation[] = [

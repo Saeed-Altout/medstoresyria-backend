@@ -68,7 +68,7 @@ interface OrderForStatusEmail {
   rejection_reason?: string | null;
 }
 
-export function orderStatusTemplate(order: OrderForStatusEmail, locale: string = 'en'): string {
+export function orderStatusTemplate(order: OrderForStatusEmail, locale: string = 'en', baseUrl: string = 'https://medstoresyria-website.vercel.app'): string {
   const isAr = locale.startsWith('ar');
   const cfg = STATUS_CONFIG[order.status ?? OrderStatus.PENDING] ?? STATUS_CONFIG[OrderStatus.PENDING];
 
@@ -79,7 +79,7 @@ export function orderStatusTemplate(order: OrderForStatusEmail, locale: string =
     ? `مرحباً ${name}،`
     : `Hello ${name},`;
 
-  const trackUrl = `https://medstore.sy/track/${order.order_number}`;
+  const trackUrl = `${baseUrl}/${locale}/track/${order.order_number}`;
   const btnText = isAr ? 'تتبع الطلب' : 'Track order';
 
   const rejectionNote =

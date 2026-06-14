@@ -18,7 +18,7 @@ interface OrderForEmail {
   }>;
 }
 
-export function orderConfirmationTemplate(order: OrderForEmail, locale: string = 'en'): string {
+export function orderConfirmationTemplate(order: OrderForEmail, locale: string = 'en', baseUrl: string = 'https://medstoresyria-website.vercel.app'): string {
   const isAr = locale.startsWith('ar');
 
   const headingText = isAr ? '✓ تم تأكيد طلبك!' : '✓ Order Confirmed!';
@@ -55,7 +55,7 @@ export function orderConfirmationTemplate(order: OrderForEmail, locale: string =
     ? 'الدفع عند الاستلام (COD) — يرجى تجهيز المبلغ عند التسليم.'
     : 'Payment is Cash on Delivery (COD) — please have the exact amount ready upon delivery.';
 
-  const trackUrl = `https://medstore.sy/track/${order.order_number}`;
+  const trackUrl = `${baseUrl}/${locale}/track/${order.order_number}`;
   const btnText = isAr ? 'تتبع طلبك' : 'Track your order';
 
   const subtotal = order.subtotal_usd ? parseFloat(order.subtotal_usd).toFixed(2) : '0.00';
